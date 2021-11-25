@@ -1,4 +1,4 @@
-"""""
+
 zoznam_prazdny = []
 zoznam_cisel = [1,5,8,9,7,15]
 zoznam_pismen = ["a""b""c"]
@@ -57,7 +57,7 @@ print("suma", sum(myList2))
 
 print(myList2)
 print(sorted(myList2))
-"""""
+
 
 zoznam = list (range(10,0,-1))
 for cislo in zoznam:
