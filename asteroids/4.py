@@ -20,13 +20,14 @@ batch = pyglet.graphics.Batch() #ZOZNAM SPRITOV PRE ZJEDNODUŠENÉ VYKRESLENIE
 pressed_keyboards = set()       #MNOŽINA ZMAČKNUTÝCH KLÁVES
 
 # Todo: Pridaj KONŠTANTY pre delay na strelbu, laserlifetime, laserspeed
-delay_na_strelbu = 0.5
+delay_na_strelbu = 0.4
 laserlifetime = 30
 laserspeed = 300
 
+ship_lifes = 3
+
 "Score"
 score = 0
-scoreLabel = pyglet.text.Label(text=str(score), font_size=40,x = 1150, y = 760, anchor_x='right', anchor_y='center', batch=batch )
 
 "------------------- FUNKCIE __________________"
 
@@ -227,17 +228,19 @@ Trieda Asteroid
 class Asteroid(SpaceObject):
     "Metóda ktorá sa vykoná ak dôjde ku kolízii lode a asteroidu"
     def hit_by_spaceship(self, ship):
+        global ship_lifes
         pressed_keyboards.clear()
         ship.reset()
         self.delete()
+        ship_lifes -= 1
 
     "Metóda ktorá sa vykoná ak dôjde ku kolíziiwwwww a asteroidu"
     def hit_by_laser(self, laser):
         # Todo: update score + kolizia
         global score
-        score += 10
-        laser.delete()
         self.delete()
+        laser.delete()
+        score += 10
 
 
 """
@@ -258,7 +261,7 @@ class Laser(SpaceObject):
         self.x_speed = laserspeed * math.cos(self.rotation)
         self.y_speed = laserspeed * math.sin(self.rotation)
 
-        for obj in [o for o in game_objects if o != self]:
+        for obj in [o for o in game_objects if o != self and o != Spaceship]:
             d = self.distance(obj)
             if d < self.radius + obj.radius:
                 obj.hit_by_laser(self)
@@ -288,6 +291,13 @@ class Game:
                            'Assetss/PNG/Meteors/meteorGrey_small1.png',
                            'Assetss/PNG/Meteors/meteorGrey_tiny1.png']
         self.laser_image = pyglet.image.load('Assetss/PNG/Lasers/laserRed16.png')
+        self.ship_life_image = pyglet.image.load('Assetss/PNG/UI/playerLife1_blue.png')
+
+    def ship_life(self):
+        for i in range(ship_lifes):
+            self.ship_life_image.blit(30 + i * 35, 30)
+        sprite = pyglet.sprite.Sprite(self.ship_life_image, batch=batch)
+
     """
     Vytvorenie objektov pre začiatok hry
     """
@@ -335,10 +345,14 @@ class Game:
         self.window.clear()
         # Vykreslenie pozadia
         self.background.draw()
+        scoreLabel = pyglet.text.Label(text=str(score), font_size=40, x=1150, y=760, anchor_x='right',
+                                       anchor_y='center')
+
+        scoreLabel.draw()
 
         "Vykreslenie koliznych koliečok"
         for o in game_objects:
-            draw_circle(o.sprite.x, o.sprite.y, o.radius)
+            #draw_circle(o.sprite.x, o.sprite.y, o.radius)
 
         # Táto časť sa stará o to aby bol prechod cez okraje okna plynulý a nie skokový
         for x_offset in (-self.window.width, 0, self.window.width):
